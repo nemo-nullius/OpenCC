@@ -29,9 +29,18 @@ std::string Conversion::Convert(const char* phrase) const {
     if (matched.IsNull()) {
       matchedLength = UTF8Util::NextCharLength(pstr);
       buffer << UTF8Util::FromSubstr(pstr, matchedLength);
+      buffer << 0;
     } else {
       matchedLength = matched.Get()->KeyLength();
-      buffer << matched.Get()->GetDefault();
+      // buffer << matched.Get()->GetDefault();
+      // append NumValues in the result the matched, including a phrase
+      std::string DefaultResult = matched.Get()->GetDefault();
+      for (const char* presult = DefaultResult.c_str(); *presult != '\0';) {
+          size_t resultCharLength = UTF8Util::NextCharLength(presult);
+          buffer << UTF8Util::FromSubstr(presult, resultCharLength);
+          buffer << matched.Get()->NumValues();
+          presult += resultCharLength;
+      }
     }
     pstr += matchedLength;
   }
